@@ -1,0 +1,30 @@
+# Base Jenkins LTS image
+FROM jenkins/jenkins:lts
+
+# Switch to root to install packages
+USER root
+
+# Install Docker CLI, Node.js, and npm
+RUN apt-get update && \
+    apt-get install -y \
+      docker.io \
+      nodejs \
+      npm \
+      curl \
+      git \
+      sudo \
+      lsb-release \
+      gnupg \
+      apt-transport-https && \
+    rm -rf /var/lib/apt/lists/*
+
+# Optional: Install Node 18 from NodeSource (for latest features)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Switch back to jenkins user
+USER jenkins
+
+# Expose Jenkins ports
+EXPOSE 8080 50000
