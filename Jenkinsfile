@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'node:18-alpine'
+      args '-v /var/run/docker.sock:/var/run/docker.sock'
+    }
+  }
 
   environment {
     DOCKER_IMAGE = "app-vestidos"
@@ -7,7 +12,6 @@ pipeline {
   }
 
   stages {
-
     stage("Checkout") {
       steps {
         checkout scm
@@ -34,28 +38,13 @@ pipeline {
 
     stage("Run Docker Container") {
       steps {
-        // Stop and remove existing container if it exists
         sh """
           if [ \$(docker ps -a -q -f name=${DOCKER_IMAGE}) ]; then
             docker rm -f ${DOCKER_IMAGE}
           fi
         """
-        // Run the container locally
         sh "docker run -d -p 3000:3000 --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}:${DOCKER_TAG}"
       }
-    }
-
-  }
-
-  post {
-    always {
-      echo "Pipeline finished."
-    }
-    success {
-      echo "✅ App is running locally at http://localhost:3000"
-    }
-    failure {
-      echo "❌ Pipeline failed!"
     }
   }
 }
