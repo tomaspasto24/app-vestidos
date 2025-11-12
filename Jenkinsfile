@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'node:18-alpine'
-      args '-v /var/run/docker.sock:/var/run/docker.sock'
-    }
-  }
+  agent any
 
   environment {
     DOCKER_IMAGE = "app-vestidos"
@@ -20,13 +15,13 @@ pipeline {
 
     stage("Install Dependencies") {
       steps {
-        sh 'npm install'
+        sh 'docker run --rm -v $PWD:/app -w /app node:18-alpine npm install'
       }
     }
 
     stage("Build Next.js") {
       steps {
-        sh 'npm run build'
+        sh 'docker run --rm -v $PWD:/app -w /app node:18-alpine npm run build'
       }
     }
 
