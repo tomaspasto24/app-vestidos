@@ -14,4 +14,4 @@ COPY . .
 EXPOSE 3000
 
 # Run in dev mode (hot reload)
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "build"]
