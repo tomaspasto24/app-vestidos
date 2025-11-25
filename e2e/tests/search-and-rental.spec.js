@@ -38,7 +38,6 @@ test.describe("Search and Rental Tests", () => {
     await expect(page).toHaveURL(new RegExp(`.*/items/${itemId}`));
     await expect(itemPage.isRentalFormVisible()).resolves.toBe(true);
 
-    // Use a more unique offset to avoid conflicts with other tests
     const uniqueOffset = Math.floor(Date.now() / 100) % 500;   
     const startDate = new Date();
     startDate.setDate(startDate.getDate() + 100 + uniqueOffset);
