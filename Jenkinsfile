@@ -1,9 +1,8 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = "app-vestidos"
-        DOCKER_TAG = "latest"
+    triggers {
+        githubPush()
     }
 
     stages {
@@ -24,30 +23,6 @@ pipeline {
             steps {
                 echo "Building Next.js app..."
                 sh 'npm run build'
-            }
-        }
-
-        stage("Build Docker Image") {
-            steps {
-                echo "Building Docker image..."
-                sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-            }
-        }
-
-        stage("Run Docker Container") {
-            steps {
-                echo "Stopping previous container if exists..."
-                sh """
-                    if [ \$(docker ps -a -q -f name=${DOCKER_IMAGE}) ]; then
-                        docker rm -f ${DOCKER_IMAGE}
-                    fi
-                """
-
-                echo "Running Docker container..."
-                sh "docker run -d -p 3000:3000 --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                
-                echo "Waiting for application to be ready..."
-                sh "sleep 10"
             }
         }
 
