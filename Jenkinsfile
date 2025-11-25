@@ -1,9 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = "app-vestidos"
-        DOCKER_TAG = "latest"
+    triggers {
+        pollSCM('H/5 * * * *') // Poll every 5 minutes
+        // OR use webhook trigger (recommended)
+        githubPush()
     }
 
     stages {
