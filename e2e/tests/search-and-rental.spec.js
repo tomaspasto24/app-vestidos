@@ -38,9 +38,9 @@ test.describe("Search and Rental Tests", () => {
     await expect(page).toHaveURL(new RegExp(`.*/items/${itemId}`));
     await expect(itemPage.isRentalFormVisible()).resolves.toBe(true);
 
-    const uniqueOffset = Math.floor(Date.now() / 1000) % 200;
+    const uniqueOffset = Math.floor(Date.now() / 100) % 500;   
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() + 60 + uniqueOffset);
+    startDate.setDate(startDate.getDate() + 100 + uniqueOffset);
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 3);
 
