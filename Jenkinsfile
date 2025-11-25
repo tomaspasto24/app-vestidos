@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     triggers {
-        pollSCM('H/5 * * * *') // Poll every 5 minutes
-        // OR use webhook trigger (recommended)
         githubPush()
     }
 
