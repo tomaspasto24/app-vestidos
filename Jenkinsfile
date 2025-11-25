@@ -45,6 +45,19 @@ pipeline {
 
                 echo "Running Docker container..."
                 sh "docker run -d -p 3000:3000 --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                
+                echo "Waiting for application to be ready..."
+                sh "sleep 10"
+            }
+        }
+
+        stage("Run E2E Tests") {
+            steps {
+                echo "Installing Playwright browsers..."
+                sh "npx playwright install --with-deps"
+                
+                echo "Running E2E tests..."
+                sh "npm run test:e2e"
             }
         }
     }
