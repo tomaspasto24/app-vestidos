@@ -23,7 +23,7 @@ pipeline {
         stage("Build Next.js") {
             steps {
                 echo "Building Next.js app..."
-                sh 'npm run dev'
+                sh 'npm run build'
             }
         }
 
