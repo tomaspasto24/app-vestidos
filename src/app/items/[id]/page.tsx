@@ -65,7 +65,7 @@ export default async function ItemDetail({params}: { params: Promise<{ id: strin
               </div>
               <div>
                 <label className="sr-only" htmlFor="phone">Phone</label>
-                <input id="phone" name="phone" required placeholder="Phone" className="w-full rounded-xl border px-4 py-3 text-sm" />
+                <input id="phone" name="phone" type="tel" pattern="[0-9]*" inputMode="numeric" required placeholder="Phone" className="w-full rounded-xl border px-4 py-3 text-sm" />
               </div>
               <div>
                 <label className="sr-only" htmlFor="start">Start date</label>
