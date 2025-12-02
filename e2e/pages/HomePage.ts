@@ -1,5 +1,26 @@
+import { Page, Locator } from "@playwright/test";
+
+interface SearchFilters {
+  query?: string;
+  startDate?: string;
+  endDate?: string;
+  size?: string;
+}
+
 class HomePage {
-  constructor(page) {
+  private page: Page;
+  
+  private searchForm: string;
+  private searchInput: string;
+  private startDateInput: string;
+  private endDateInput: string;
+  private sizeSelect: string;
+  private searchButton: string;
+  
+  private pageTitle: string;
+  private featuredSection: string;
+
+  constructor(page: Page) {
     this.page = page;
     
     this.searchForm = 'form[action="/search"]';
@@ -13,31 +34,31 @@ class HomePage {
     this.featuredSection = '#featured';
   }
 
-  async navigate() {
+  async navigate(): Promise<void> {
     await this.page.goto('/');
   }
 
-  async fillSearchQuery(query) {
+  async fillSearchQuery(query: string): Promise<void> {
     await this.page.fill(this.searchInput, query);
   }
 
-  async selectStartDate(date) {
+  async selectStartDate(date: string): Promise<void> {
     await this.page.fill(this.startDateInput, date);
   }
 
-  async selectEndDate(date) {
+  async selectEndDate(date: string): Promise<void> {
     await this.page.fill(this.endDateInput, date);
   }
 
-  async selectSize(size) {
+  async selectSize(size: string): Promise<void> {
     await this.page.selectOption(this.sizeSelect, size);
   }
 
-  async submitSearch() {
+  async submitSearch(): Promise<void> {
     await this.page.click(this.searchButton);
   }
 
-  async searchWithFilters({ query = '', startDate = '', endDate = '', size = '' }) {
+  async searchWithFilters({ query = '', startDate = '', endDate = '', size = '' }: SearchFilters): Promise<void> {
     if (query) await this.fillSearchQuery(query);
     if (startDate) await this.selectStartDate(startDate);
     if (endDate) await this.selectEndDate(endDate);
@@ -45,29 +66,30 @@ class HomePage {
     await this.submitSearch();
   }
 
-  async getSearchInputValue() {
+  async getSearchInputValue(): Promise<string> {
     return await this.page.inputValue(this.searchInput);
   }
 
-  async getStartDateValue() {
+  async getStartDateValue(): Promise<string> {
     return await this.page.inputValue(this.startDateInput);
   }
 
-  async getEndDateValue() {
+  async getEndDateValue(): Promise<string> {
     return await this.page.inputValue(this.endDateInput);
   }
 
-  async getSelectedSize() {
+  async getSelectedSize(): Promise<string> {
     return await this.page.inputValue(this.sizeSelect);
   }
 
-  async isSearchFormVisible() {
+  async isSearchFormVisible(): Promise<boolean> {
     return await this.page.isVisible(this.searchForm);
   }
 
-  async waitForSearchResults() {
+  async waitForSearchResults(): Promise<void> {
     await this.page.waitForURL('**/search**');
   }
 }
 
-module.exports = { HomePage };
+export { HomePage };
+

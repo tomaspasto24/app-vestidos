@@ -1,10 +1,10 @@
-const { test, expect } = require("@playwright/test");
-const { HomePage } = require("../pages/HomePage");
-const { ItemPage } = require("../pages/ItemPage");
+import { test, expect } from "@playwright/test";
+import { HomePage } from "../pages/HomePage";
+import { ItemPage } from "../pages/ItemPage";
 
 test.describe("Search and Rental Tests", () => {
-  let homePage;
-  let itemPage;
+  let homePage: HomePage;
+  let itemPage: ItemPage;
 
   test.describe.configure({ mode: "serial" });
 
@@ -30,8 +30,12 @@ test.describe("Search and Rental Tests", () => {
     await expect(itemLink).toBeVisible();
 
     const href = await itemLink.getAttribute("href");
-    const itemIdMatch = href.match(/\/items\/(\d+)/);
+    const itemIdMatch = href?.match(/\/items\/(\d+)/);
     const itemId = itemIdMatch ? itemIdMatch[1] : null;
+
+    if (!itemId) {
+      throw new Error("Item ID not found");
+    }
 
     await itemLink.click();
 
@@ -44,7 +48,7 @@ test.describe("Search and Rental Tests", () => {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 3);
 
-    const formatDate = (date) => {
+    const formatDate = (date: Date): string => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
@@ -101,7 +105,7 @@ test.describe("Search and Rental Tests", () => {
 
     const itemTitle = await itemPage.getItemTitle();
     expect(itemTitle).toBeTruthy();
-    expect(itemTitle.length).toBeGreaterThan(0);
+    expect(itemTitle?.length).toBeGreaterThan(0);
   });
 
   test("should display dress details on item detail page", async ({ page }) => {
@@ -112,8 +116,12 @@ test.describe("Search and Rental Tests", () => {
     await expect(firstItemLink).toBeVisible();
 
     const href = await firstItemLink.getAttribute("href");
-    const itemIdMatch = href.match(/\/items\/(\d+)/);
+    const itemIdMatch = href?.match(/\/items\/(\d+)/);
     const itemId = itemIdMatch ? itemIdMatch[1] : null;
+
+    if (!itemId) {
+      throw new Error("Item ID not found");
+    }
 
     await firstItemLink.click();
 
@@ -121,15 +129,15 @@ test.describe("Search and Rental Tests", () => {
 
     const itemTitle = await itemPage.getItemTitle();
     expect(itemTitle).toBeTruthy();
-    expect(itemTitle.length).toBeGreaterThan(0);
+    expect(itemTitle?.length).toBeGreaterThan(0);
 
     const itemCategory = await itemPage.getItemCategory();
     expect(itemCategory).toBeTruthy();
-    expect(itemCategory.trim().length).toBeGreaterThan(0);
+    expect(itemCategory?.trim().length).toBeGreaterThan(0);
 
     const itemDescription = await itemPage.getItemDescription();
     expect(itemDescription).toBeTruthy();
-    expect(itemDescription.trim().length).toBeGreaterThan(0);
+    expect(itemDescription?.trim().length).toBeGreaterThan(0);
 
     const itemPrice = await itemPage.getItemPrice();
     expect(itemPrice).toBeTruthy();
@@ -165,3 +173,4 @@ test.describe("Search and Rental Tests", () => {
     expect(calendarDaysCount).toBe(30);
   });
 });
+

@@ -1,8 +1,8 @@
-const { test, expect } = require("@playwright/test");
-const { HomePage } = require("../pages/HomePage");
+import { test, expect } from "@playwright/test";
+import { HomePage } from "../pages/HomePage";
 
 test.describe("Search Query Filter Tests", () => {
-  let homePage;
+  let homePage: HomePage;
 
   test.beforeEach(async ({ page }) => {
     homePage = new HomePage(page);
@@ -52,3 +52,4 @@ test.describe("Search Query Filter Tests", () => {
     expect(searchInputValue).toBe("");
   });
 });
+
