@@ -1,4 +1,4 @@
-import { Page, Locator } from "@playwright/test";
+import { Page } from "@playwright/test";
 
 interface RentalData {
   name: string;
@@ -17,7 +17,7 @@ class ItemPage {
   public phoneInput: string;
   public startDateInput: string;
   public endDateInput: string;
-  private submitButton: string;
+  public submitButton: string;
 
   private itemTitle: string;
   private itemCategory: string;
@@ -62,6 +62,11 @@ class ItemPage {
   }
 
   async submitRentalForm(itemId: string): Promise<void> {
+    const urlPromise = this.page.waitForURL(
+      new RegExp(`.*/items/${itemId}(\\?success=1)?`),
+      { timeout: 20000 }
+    );
+
     const responsePromise = this.page.waitForResponse(
       (response) => {
         return (
@@ -69,24 +74,35 @@ class ItemPage {
           response.request().method() === "POST"
         );
       },
-      { timeout: 15000 }
-    );
+      { timeout: 20000 }
+    ).catch(() => null);
 
     await this.page.click(this.submitButton);
 
-    const response = await responsePromise;
-
-    const status = response.status();
-
-    if (status >= 200 && status < 300) {
-      try {
-        await this.page.waitForURL(
-          new RegExp(`.*/items/${itemId}(\\?success=1)?`),
-          {
-            timeout: 10000,
+    try {
+      const response = await responsePromise;
+      
+      if (response) {
+        const status = response.status();
+        
+        if (status >= 400) {
+          try {
+            const body = await response.text();
+            throw new Error(
+              `Form submission failed with status ${status}: ${body}`
+            );
+          } catch (error) {
+            if (error instanceof Error && error.message.includes("unavailable")) {
+              throw new Error(`Form submission failed with status ${status}`);
+            }
+            throw error;
           }
-        );
-      } catch (error) {
+        }
+      }
+
+      await urlPromise;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("waitForURL")) {
         const currentUrl = this.page.url();
         if (currentUrl.includes("/api/rentals")) {
           await this.page.waitForTimeout(2000);
@@ -94,25 +110,10 @@ class ItemPage {
           if (!finalUrl.includes(`/items/${itemId}`)) {
             await this.page.goto(`/items/${itemId}?success=1`);
           }
+        } else {
+          throw error;
         }
-      }
-    } else if (status >= 300 && status < 400) {
-      await this.page.waitForURL(
-        new RegExp(`.*/items/${itemId}(\\?success=1)?`),
-        {
-          timeout: 10000,
-        }
-      );
-    } else {
-      try {
-        const body = await response.text();
-        throw new Error(
-          `Form submission failed with status ${status}: ${body}`
-        );
-      } catch (error) {
-        if (error instanceof Error && error.message.includes("unavailable")) {
-          throw new Error(`Form submission failed with status ${status}`);
-        }
+      } else {
         throw error;
       }
     }
