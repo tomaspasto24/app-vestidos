@@ -1,5 +1,29 @@
+import { Page, Locator } from "@playwright/test";
+
+interface CustomerInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 class AdminPage {
-  constructor(page) {
+  private page: Page;
+
+  private loginForm: string;
+  private usernameInput: string;
+  private passwordInput: string;
+  private loginButton: string;
+
+  private dashboardTitle: string;
+  private rentalsSection: string;
+  private rentalsTable: string;
+  private rentalsTableBody: string;
+  private rentalRows: string;
+  private noRentalsMessage: string;
+
+  private logoutButton: string;
+
+  constructor(page: Page) {
     this.page = page;
 
     this.loginForm = 'form[action="/api/admin/login"]';
@@ -17,15 +41,15 @@ class AdminPage {
     this.logoutButton = 'button:has-text("Sign out")';
   }
 
-  async navigate() {
+  async navigate(): Promise<void> {
     await this.page.goto("/admin");
   }
 
-  async navigateToLogin() {
+  async navigateToLogin(): Promise<void> {
     await this.page.goto("/admin/login");
   }
 
-  async login(username = "admin", password = "admin123") {
+  async login(username: string = "admin", password: string = "admin123"): Promise<void> {
     await this.navigateToLogin();
     await this.page.fill(this.usernameInput, username);
     await this.page.fill(this.passwordInput, password);
@@ -33,23 +57,23 @@ class AdminPage {
     await this.page.waitForURL("**/admin");
   }
 
-  async isDashboardVisible() {
+  async isDashboardVisible(): Promise<boolean> {
     return await this.page.isVisible(this.dashboardTitle);
   }
 
-  async isRentalsSectionVisible() {
+  async isRentalsSectionVisible(): Promise<boolean> {
     return await this.page.isVisible(this.rentalsSection);
   }
 
-  async isRentalsTableVisible() {
+  async isRentalsTableVisible(): Promise<boolean> {
     return await this.page.isVisible(this.rentalsTable);
   }
 
-  async getRentalRowsCount() {
+  async getRentalRowsCount(): Promise<number> {
     return await this.page.locator(this.rentalRows).count();
   }
 
-  async getRentalRow(index) {
+  async getRentalRow(index: number): Promise<Locator | null> {
     const rows = await this.page.locator(this.rentalRows).all();
     if (index >= 0 && index < rows.length) {
       return rows[index];
@@ -57,37 +81,37 @@ class AdminPage {
     return null;
   }
 
-  async getRentalId(row) {
+  async getRentalId(row: Locator): Promise<string | null> {
     const cells = await row.locator("td").all();
     return cells.length > 0 ? await cells[0].textContent() : null;
   }
 
-  async getRentalItemId(row) {
+  async getRentalItemId(row: Locator): Promise<string | null> {
     const cells = await row.locator("td").all();
     return cells.length > 1 ? await cells[1].textContent() : null;
   }
 
-  async getRentalDates(row) {
+  async getRentalDates(row: Locator): Promise<string | null> {
     const cells = await row.locator("td").all();
     return cells.length > 2 ? await cells[2].textContent() : null;
   }
 
-  async getRentalCustomer(row) {
+  async getRentalCustomer(row: Locator): Promise<CustomerInfo | null> {
     const cells = await row.locator("td").all();
     if (cells.length > 3) {
       const customerCell = cells[3];
       const cellText = await customerCell.textContent();
       
       // Extract name (first line, before email)
-      const lines = cellText.split("\n").map((line) => line.trim()).filter((line) => line);
+      const lines = cellText ? cellText.split("\n").map((line) => line.trim()).filter((line) => line) : [];
       const name = lines[0] || "";
       
       // Extract email (contains @)
-      const emailMatch = cellText.match(/[\w.-]+@[\w.-]+\.\w+/);
+      const emailMatch = cellText ? cellText.match(/[\w.-]+@[\w.-]+\.\w+/) : null;
       const email = emailMatch ? emailMatch[0] : "";
       
       // Extract phone (contains + or digits)
-      const phoneMatch = cellText.match(/\+?[\d\s-]+/);
+      const phoneMatch = cellText ? cellText.match(/\+?[\d\s-]+/) : null;
       const phone = phoneMatch ? phoneMatch[0].trim() : "";
       
       return { name, email, phone };
@@ -95,20 +119,20 @@ class AdminPage {
     return null;
   }
 
-  async getRentalStatus(row) {
+  async getRentalStatus(row: Locator): Promise<string | null> {
     const cells = await row.locator("td").all();
     return cells.length > 4 ? await cells[4].textContent() : null;
   }
 
-  async hasNoRentalsMessage() {
+  async hasNoRentalsMessage(): Promise<boolean> {
     return await this.page.isVisible(this.noRentalsMessage);
   }
 
-  async logout() {
+  async logout(): Promise<void> {
     await this.page.click(this.logoutButton);
     await this.page.waitForURL("**/admin/login");
   }
 }
 
-module.exports = { AdminPage };
+export { AdminPage };
 

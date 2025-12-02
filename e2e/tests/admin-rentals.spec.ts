@@ -1,12 +1,12 @@
-const { test, expect } = require("@playwright/test");
-const { AdminPage } = require("../pages/AdminPage");
-const { HomePage } = require("../pages/HomePage");
-const { ItemPage } = require("../pages/ItemPage");
+import { test, expect } from "@playwright/test";
+import { AdminPage } from "../pages/AdminPage";
+import { HomePage } from "../pages/HomePage";
+import { ItemPage } from "../pages/ItemPage";
 
 test.describe("Admin Rentals Tests", () => {
-  let adminPage;
-  let homePage;
-  let itemPage;
+  let adminPage: AdminPage;
+  let homePage: HomePage;
+  let itemPage: ItemPage;
 
   test.beforeEach(async ({ page }) => {
     adminPage = new AdminPage(page);
@@ -50,8 +50,12 @@ test.describe("Admin Rentals Tests", () => {
     await firstItemLink.click();
 
     const href = await firstItemLink.getAttribute("href");
-    const itemIdMatch = href.match(/\/items\/(\d+)/);
+    const itemIdMatch = href?.match(/\/items\/(\d+)/);
     const itemId = itemIdMatch ? itemIdMatch[1] : null;
+
+    if (!itemId) {
+      throw new Error("Item ID not found");
+    }
 
     await expect(page).toHaveURL(new RegExp(`.*/items/${itemId}`));
 
@@ -61,7 +65,7 @@ test.describe("Admin Rentals Tests", () => {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 3);
 
-    const formatDate = (date) => {
+    const formatDate = (date: Date): string => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
@@ -88,6 +92,10 @@ test.describe("Admin Rentals Tests", () => {
       const lastRentalRow = await adminPage.getRentalRow(0);
       expect(lastRentalRow).not.toBeNull();
 
+      if (!lastRentalRow) {
+        throw new Error("Last rental row not found");
+      }
+
       const rentalItemId = await adminPage.getRentalItemId(lastRentalRow);
       expect(rentalItemId).toBe(itemId);
 
@@ -97,9 +105,11 @@ test.describe("Admin Rentals Tests", () => {
 
       const rentalCustomer = await adminPage.getRentalCustomer(lastRentalRow);
       expect(rentalCustomer).not.toBeNull();
-      expect(rentalCustomer.name).toBe(rentalData.name);
-      expect(rentalCustomer.email).toBe(rentalData.email);
-      expect(rentalCustomer.phone).toContain(rentalData.phone.replace("+", ""));
+      if (rentalCustomer) {
+        expect(rentalCustomer.name).toBe(rentalData.name);
+        expect(rentalCustomer.email).toBe(rentalData.email);
+        expect(rentalCustomer.phone).toContain(rentalData.phone.replace("+", ""));
+      }
 
       const rentalStatus = await adminPage.getRentalStatus(lastRentalRow);
       expect(rentalStatus?.toLowerCase()).toContain("active");
